@@ -1,50 +1,111 @@
-# Welcome to your Expo app 👋
+# Fintom — Personal Finance Companion
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A privacy-first personal finance app for iOS, built to replace [Spendee](https://www.spendee.com) with deeper analytics, Google Sheets sync, and a personal data pipeline.
 
-## Get started
+> **Status:** 🚧 In active development — Week 1 of 7. See [milestones](#roadmap).
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Why this exists
 
-2. Start the app
+Existing personal finance apps — Spendee, Mint, YNAB — treat your data as theirs. You log thousands of transactions, then export a clunky CSV when you want to do real analysis.
 
-   ```bash
-   npx expo start
-   ```
+Fintom inverts that:
 
-In the output, you'll find options to open the app in a
+- **Your phone is the source of truth** — SQLite, on-device, offline-first.
+- **Your data flows to your tools** — Google Sheets for reporting, DuckDB for SQL analytics.
+- **You own the pipeline** — every layer is open and inspectable.
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+Built as a [portfolio project](#portfolio-context) for analytics engineering work.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## Features (Phase 1)
 
-When you're ready, run:
+- ✅ Multi-wallet transaction logging (Cash, Comdirect, Trade Republic, Monefit)
+- ✅ 23 categories, fully customizable
+- ✅ Tags (free-form labels for cards, merchants, contexts)
+- ✅ Transfers between wallets (paired records)
+- ✅ Recurring/scheduled transactions
+- ✅ Monthly budget tracking with carry-forward
+- ✅ Goal tracking (savings, debt payoff, FI/Coast FI milestones)
+- ✅ Light theme, EUR primary, colorful category icons
+- ✅ Tax-relevant flagging on transactions
+- ✅ CSV import (Spendee export format)
+- ✅ Search and filter transactions
 
-```bash
-npm run reset-project
-```
+## Roadmap
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+| Phase | Focus | Status |
+|---|---|---|
+| 1 | Core app — replace Spendee | 🚧 Week 1 of 7 |
+| 2 | Google Sheets sync, tax export, recurring rules | Planned |
+| 3 | Net worth dashboard, Coast FI tracker | Planned |
+| 4 | DuckDB analytics layer | Planned |
+| 5 | Apple Shortcuts integration for Apple Pay logging | Planned |
 
-## Learn more
+---
 
-To learn more about developing your project with Expo, look at the following resources:
+## Architecture
+iPhone (React Native + Expo)
+↓
+SQLite (source of truth)
+↓
+Python sync layer
+↙        ↘
+DuckDB    Google Sheets
+(analytics) (reporting)
+↓
+GitHub
+(version control)
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+See [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) for detail.
 
-## Join the community
+## Tech Stack
 
-Join our community of developers creating universal apps.
+- **App:** React Native + Expo SDK 54 + TypeScript
+- **DB (local):** SQLite via `expo-sqlite`
+- **Routing:** Expo Router (file-based, type-safe)
+- **State:** React Context + hooks
+- **Charts:** Victory Native
+- **Sync (Phase 2):** Python + Google Sheets API
+- **Analytics (Phase 4):** DuckDB
+- **CI/CD:** EAS Build (planned)
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## Documentation
+
+- [`docs/ARCHITECTURE.md`](./docs/ARCHITECTURE.md) — system design and data flow
+- [`docs/SCHEMA.md`](./docs/SCHEMA.md) — database schema and rationale
+- [`docs/DECISIONS.md`](./docs/DECISIONS.md) — Architecture Decision Records (ADRs)
+- [`CLAUDE.md`](./CLAUDE.md) — context for AI coding agents
+
+---
+
+## Portfolio Context
+
+This project is a learning artifact for the path from **Data Analyst → Analytics Engineer**. It exercises:
+
+- SQL schema design under real constraints (multi-currency, transfers, tax)
+- TypeScript end-to-end (type-safe queries, type-safe routes)
+- Data pipeline thinking (ELT: app → SQLite → Sheets/DuckDB)
+- Documentation-first engineering (ADRs, schema docs, public README)
+- AI-augmented development (Claude Code)
+- Git workflow on a solo project (feature branches, PRs to self, semantic commits)
+
+All code, schema, and decisions are public. **Real financial data is never committed.** Sample data in [`data/sample/`](./data/sample) is synthetic.
+
+---
+
+## License
+
+MIT — see [LICENSE](./LICENSE).
+
+---
+
+## Author
+
+**Hayder Ali**
+Munich · Analytics Engineer
+[github.com/hayderalijaan](https://github.com/hayderalijaan)
