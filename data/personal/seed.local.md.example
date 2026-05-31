@@ -1,0 +1,55 @@
+# Real Seed Values — PRIVATE (gitignored)
+
+⛔ This file is a template. Copy it to `seed.local.md` and fill in your real
+numbers. `seed.local.md` is gitignored and must never be committed.
+`seed.local.md.example` is safe to commit — it contains no real amounts.
+
+## How to use
+
+1. `cp data/personal/seed.local.md.example data/personal/seed.local.md`
+2. Replace every `X` placeholder with your real value
+3. Use `seed.local.md` as reference when entering amounts in-app
+
+These values are documentation only — the app does not read this file.
+Amounts go into the app manually (or via CSV import for historical data).
+
+---
+
+## Wallet opening balances
+
+Set these as `balance_cents` when creating wallets in-app.
+Use the balance on the day you start using Fintom, before importing history.
+
+- Cash                 €X,XXX.XX  (type: cash)
+- Giro Comdirect      €X,XXX.XX  (type: checking)
+- Trade Republic      €X,XXX.XX  (type: savings)
+- Monefit             €X,XXX.XX  (type: p2p)
+
+---
+
+## Recurring rules
+
+Match these to the 8 rules seeded by `seed.ts`. Edit each rule in-app to
+set the correct `amount_cents` (integer cents — €12.50 = 1250).
+
+- Salary          €X,XXX.XX income, Comdirect, monthly 24th
+- Rent            €X,XXX.XX expense, Comdirect, monthly 1st (Home)
+- Strom           €XX.XX expense, Comdirect, monthly 1st (Utilities)
+- Internet        €XX.XX expense, Comdirect, monthly (Bills & Fees)
+- Investment      €XX.XX expense, Trade Republic, monthly 2nd
+- Education       €XX.XX expense, Trade Republic, monthly 6th
+- Radio Tax       €XX.XX expense, Comdirect, quarterly 15th
+- Sport           €XX.XX expense, Comdirect, weekly Friday (ends June 30)
+
+---
+
+## Goals
+
+Match these to the 5 goals seeded by `seed.ts`. Edit each goal in-app to
+set the correct `target_cents`.
+
+- 🆘 Emergency Fund         — savings     — €X,XXX target
+- 👨‍👩‍👦 Family Debt             — debt_payoff — €XX,XXX target
+- ☁️ Coast FI               — milestone   — €XXX,XXX target
+- 🏝️ Financial Independence  — fi          — €X,XXX,XXX target
+- 💍 Marriage Budget         — savings     — €XX,XXX target

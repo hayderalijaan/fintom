@@ -58,7 +58,8 @@ credentials/
 
 # === Personal finance data — NEVER COMMIT ===
 # Real CSV exports from Spendee or banks
-data/personal/
+data/personal/*
+!data/personal/seed.local.md.example
 data/raw/
 data/exports/
 *_real.csv
