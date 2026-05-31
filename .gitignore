@@ -93,3 +93,4 @@ coverage/
 *.bak
 *.backup
 expo-env.d.ts
+docs/COOKBOOK.md
