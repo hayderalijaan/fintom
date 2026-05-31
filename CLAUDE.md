@@ -440,18 +440,40 @@ Types: feat, fix, docs, style, refactor, test, chore
 
 ## CSV Import Format (Spendee Export)
 
-The import script expects this column structure:
-Date, Amount, Currency, Note, Category name, Type, Wallet, Labels
-Where `Type` is one of:
+Real column order from actual Spendee exports (9 columns, positional):
+
+```
+Date, Wallet, Type, Category name, Amount, Currency, Note, Labels, Author
+```
+
+- **Date** — ISO 8601 with timezone: `2026-01-01T10:23:29+00:00`. The import strips everything after `T` to get `YYYY-MM-DD`.
+- **Amount** — float with up to 8 decimal places. Negative for expenses and outgoing transfers. Converted to cents via `Math.round(parseFloat(amount) * 100)`.
+- **Author** — always `"Hayder Ali"`, ignored by the importer.
+
+`Type` is one of:
 
 - `Income`
 - `Expense`
 - `Incoming Transfer`
 - `Outgoing Transfer`
 
-Amount is negative for expenses in Spendee format.
-Import maps: Spendee category name → Fintom category name (1:1 for our 23 categories).
-Import creates tags from the `Labels` column (comma-separated).
+**Name aliases** — Spendee uses different names than the Fintom seed. The importer resolves these automatically via `CATEGORY_ALIASES` and `WALLET_ALIASES` in `src/utils/csv-import.ts`:
+
+| Spendee name | Fintom seed name |
+|---|---|
+| `Bargeld` | `Cash` (wallet) |
+| `Transport` | `Transportation` |
+| `Healthcare` | `Medical` |
+| `Self care` | `Personal Care` |
+| `Gifts` | `Gifts Received` |
+| `Receivables` | `Refund` |
+| `Strom` | `Utilities` |
+| `Other` | `Other Income` |
+| `Interest payout` | `Other Income` |
+| `Insurance Payout` | `Other Income` |
+| `Family & Personal` | `Misc` |
+
+Import creates tags from the `Labels` column (comma-separated). Tags are created if they do not already exist.
 
 ---
 
