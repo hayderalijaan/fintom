@@ -1,12 +1,17 @@
-// Schema versioning. We track the applied version with SQLite's built-in
-// PRAGMA user_version (an integer stored in the DB header — no extra table).
+// Schema versioning via SQLite's built-in PRAGMA user_version.
+// No extra table needed — the version is stored in the DB file header.
 //
-// To evolve the schema: bump SCHEMA_VERSION in schema.ts, then add an
-// `if (from < N)` block below that performs the N-th migration.
+// To evolve the schema:
+//   1. Add/change DDL in schema.ts.
+//   2. Bump SCHEMA_VERSION in schema.ts.
+//   3. Add an `if (from < N)` block below that performs the N-th migration.
+//
+// Each upgrade runs in one transaction — on failure it rolls back completely
+// so the DB is never left in a half-migrated state.
 
 import type { SQLiteDatabase } from 'expo-sqlite';
 
-import { CREATE_INDEXES, CREATE_TABLES, SCHEMA_VERSION } from './schema';
+import { ALL_TABLES, createIndexes, SCHEMA_VERSION } from './schema';
 
 async function getUserVersion(db: SQLiteDatabase): Promise<number> {
   const row = await db.getFirstAsync<{ user_version: number }>('PRAGMA user_version;');
@@ -14,9 +19,8 @@ async function getUserVersion(db: SQLiteDatabase): Promise<number> {
 }
 
 /**
- * Apply any pending migrations. Idempotent: safe to call on every launch.
- * The whole upgrade runs in one transaction so a failure rolls back cleanly
- * and the DB is never left half-migrated.
+ * Run any pending migrations. Safe to call on every app launch — returns
+ * immediately when the DB is already at SCHEMA_VERSION.
  */
 export async function runMigrations(db: SQLiteDatabase): Promise<void> {
   const from = await getUserVersion(db);
@@ -27,25 +31,25 @@ export async function runMigrations(db: SQLiteDatabase): Promise<void> {
   await db.execAsync('BEGIN;');
   try {
     if (from < 1) {
-      for (const statement of CREATE_TABLES) {
-        await db.execAsync(statement);
+      for (const tpl of ALL_TABLES) {
+        await db.execAsync(tpl.statement);
       }
-      for (const statement of CREATE_INDEXES) {
-        await db.execAsync(statement);
+      for (const tpl of createIndexes) {
+        await db.execAsync(tpl.statement);
       }
     }
 
-    // Future migrations go here, e.g.:
-    // if (from < 2) { await db.execAsync('ALTER TABLE ...'); }
+    // Add future migrations here:
+    // if (from < 2) { await db.execAsync(alterSomeTable.statement); }
 
-    // SCHEMA_VERSION is a trusted integer constant (not user input), so
-    // interpolating it into this PRAGMA is safe — PRAGMA can't be parameterized.
+    // SCHEMA_VERSION is a compile-time integer constant, not user input —
+    // interpolating it into PRAGMA is safe (PRAGMA can't be parameterized).
     await db.execAsync(`PRAGMA user_version = ${SCHEMA_VERSION};`);
     await db.execAsync('COMMIT;');
   } catch (error) {
     await db.execAsync('ROLLBACK;');
     throw new Error(
-      `Migration from version ${from} to ${SCHEMA_VERSION} failed: ${String(error)}`,
+      `DB migration ${from} → ${SCHEMA_VERSION} failed: ${String(error)}`,
     );
   }
 }

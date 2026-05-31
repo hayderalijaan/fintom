@@ -1,5 +1,7 @@
-// Database entry point: open the connection, set pragmas, migrate, seed.
-// Call initializeDatabase() once at app startup (see DatabaseContext).
+// Database entry point.
+//
+// Call initializeDatabase() once at app startup (DatabaseContext does this).
+// Every subsequent module that needs the connection gets it from useDatabase().
 
 import * as SQLite from 'expo-sqlite';
 
@@ -9,11 +11,13 @@ import { seedDatabase } from './seed';
 export const DATABASE_NAME = 'fintom.db';
 
 /**
- * Open (or create) the on-device SQLite database, bring its schema up to date,
- * and seed reference data on first run. Returns the ready-to-use connection.
+ * Open (or create) the on-device SQLite DB, apply pending migrations, and
+ * seed reference data on first install. Returns the ready-to-use connection.
  *
- * WAL mode gives us better read/write concurrency; foreign_keys must be enabled
- * per-connection (SQLite defaults it off) for our ON DELETE CASCADE / FK checks.
+ * Pragmas set on every open:
+ *   WAL       — better concurrent read/write throughput.
+ *   foreign_keys — SQLite disables FK enforcement by default; we need it for
+ *                  ON DELETE CASCADE on transaction_tags and FK integrity checks.
  */
 export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
@@ -27,6 +31,8 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
   return db;
 }
 
+// Re-export the sql tag so query files have one import path.
+export { sql, type SQLTemplate } from './sql';
 export { runMigrations } from './migrations';
 export { seedDatabase } from './seed';
 export { SCHEMA_VERSION } from './schema';
