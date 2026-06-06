@@ -213,7 +213,7 @@ export default function SettingsScreen() {
             iconBg="#FF950022"
             label="Categories"
             badge={categoryCount}
-            onPress={() => router.push('/manage/categories' as Href)}
+            onPress={() => router.push('/settings/categories' as Href)}
           />
           <Separator />
           <SettingsRow

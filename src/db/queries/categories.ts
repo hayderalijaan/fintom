@@ -24,6 +24,12 @@ export interface UpdateCategoryInput {
   sort_order?: number;
 }
 
+export async function getCategoriesAll(db: SQLiteDatabase): Promise<Category[]> {
+  return db.getAllAsync<Category>(
+    'SELECT * FROM categories ORDER BY is_active DESC, sort_order ASC',
+  );
+}
+
 export async function getCategories(
   db: SQLiteDatabase,
   type?: CategoryType,
