@@ -244,3 +244,110 @@ export async function removeTagFromTransaction(
   `;
   await db.runAsync(q.statement, [...q.params]);
 }
+
+// ─── Enriched feed row ────────────────────────────────────────────────────────
+
+/**
+ * Like Transaction but with category + wallet names/icons joined in, and tags
+ * as a pipe-separated "name::color" string (e.g. "Master::#1A1F71|Amex::#2E77BC").
+ * Null when there are no tags.
+ */
+export interface TransactionFeedRow {
+  id: number;
+  date: string;
+  amount_cents: number;
+  type: TransactionType;
+  wallet_id: number;
+  category_id: number | null;
+  description: string | null;
+  note: string | null;
+  is_tax_relevant: SqliteBool;
+  transfer_group_id: string | null;
+  is_recurring: SqliteBool;
+  recurring_rule_id: number | null;
+  source: TransactionSource;
+  external_id: string | null;
+  created_at: string;
+  updated_at: string;
+  category_name: string | null;
+  category_icon: string | null;
+  category_color: string | null;
+  wallet_name: string;
+  tags_raw: string | null;
+}
+
+/**
+ * Like getTransactions but JOINs categories, wallets, and tags so the UI can
+ * render everything from a single query. Tags come back as a pipe-separated
+ * string; use parseFeedTags() to split them.
+ */
+export async function getTransactionFeed(
+  db: SQLiteDatabase,
+  filters: TransactionFilters = {},
+): Promise<TransactionFeedRow[]> {
+  const conditions: string[] = [];
+  const values: (string | number)[] = [];
+
+  if (filters.wallet_id !== undefined) {
+    conditions.push('t.wallet_id = ?');
+    values.push(filters.wallet_id);
+  }
+  if (filters.category_id !== undefined) {
+    conditions.push('t.category_id = ?');
+    values.push(filters.category_id);
+  }
+  if (filters.type !== undefined) {
+    conditions.push('t.type = ?');
+    values.push(filters.type);
+  }
+  if (filters.year_month !== undefined) {
+    conditions.push("strftime('%Y-%m', t.date) = ?");
+    values.push(filters.year_month);
+  }
+  if (filters.is_tax_relevant !== undefined) {
+    conditions.push('t.is_tax_relevant = ?');
+    values.push(filters.is_tax_relevant);
+  }
+  if (filters.search !== undefined && filters.search.trim() !== '') {
+    conditions.push('(t.description LIKE ? OR t.note LIKE ?)');
+    const term = `%${filters.search.trim()}%`;
+    values.push(term, term);
+  }
+
+  const where = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : '';
+  const limitClause = filters.limit !== undefined ? `LIMIT ${filters.limit}` : '';
+  const offsetClause = filters.offset !== undefined ? `OFFSET ${filters.offset}` : '';
+
+  return db.getAllAsync<TransactionFeedRow>(
+    `SELECT
+       t.id, t.date, t.amount_cents, t.type, t.wallet_id, t.category_id,
+       t.description, t.note, t.is_tax_relevant, t.transfer_group_id,
+       t.is_recurring, t.recurring_rule_id, t.source, t.external_id,
+       t.created_at, t.updated_at,
+       c.name  AS category_name,
+       c.icon  AS category_icon,
+       c.color AS category_color,
+       w.name  AS wallet_name,
+       GROUP_CONCAT(tg.name || '::' || tg.color, '|') AS tags_raw
+     FROM transactions t
+     LEFT JOIN categories c  ON c.id  = t.category_id
+     JOIN  wallets      w  ON w.id  = t.wallet_id
+     LEFT JOIN transaction_tags tt ON tt.transaction_id = t.id
+     LEFT JOIN tags             tg ON tg.id = tt.tag_id
+     ${where}
+     GROUP BY t.id
+     ORDER BY t.date DESC, t.id DESC ${limitClause} ${offsetClause}`,
+    values,
+  );
+}
+
+/** Splits the tags_raw string from TransactionFeedRow into typed tag objects. */
+export function parseFeedTags(raw: string | null): Array<{ name: string; color: string }> {
+  if (!raw) return [];
+  return raw.split('|').map((t) => {
+    const idx = t.indexOf('::');
+    return idx === -1
+      ? { name: t, color: '#9E9E9E' }
+      : { name: t.slice(0, idx), color: t.slice(idx + 2) };
+  });
+}

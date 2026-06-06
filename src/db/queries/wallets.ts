@@ -102,7 +102,17 @@ export async function getAllWalletsWithBalances(
     GROUP BY w.id
     ORDER BY w.sort_order ASC
   `;
-  return db.getAllAsync<WalletWithBalance>(q.statement, [...q.params]);
+  const rows = await db.getAllAsync<WalletWithBalance>(q.statement, [...q.params]);
+  console.log(
+    '[getAllWalletsWithBalances]',
+    rows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      opening: r.balance_cents,
+      current: r.current_balance_cents,
+    })),
+  );
+  return rows;
 }
 
 export async function createWallet(

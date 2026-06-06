@@ -18,6 +18,11 @@ const MAPPING = {
   'paperplane.fill': 'send',
   'chevron.left.forwardslash.chevron.right': 'code',
   'chevron.right': 'chevron-right',
+  'list.bullet': 'format-list-bulleted',
+  'wallet.pass.fill': 'account-balance-wallet',
+  'chart.bar.fill': 'bar-chart',
+  'target': 'my-location',
+  'gearshape.fill': 'settings',
 } as IconMapping;
 
 /**
