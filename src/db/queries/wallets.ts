@@ -160,6 +160,37 @@ export async function updateWallet(
   );
 }
 
+export async function getAllWalletsWithBalancesAll(
+  db: SQLiteDatabase,
+): Promise<WalletWithBalance[]> {
+  const q = sql`
+    SELECT
+      w.id,
+      w.name,
+      w.type,
+      w.currency,
+      w.balance_cents,
+      w.color,
+      w.icon,
+      w.is_active,
+      w.sort_order,
+      w.created_at,
+      w.balance_cents + COALESCE(SUM(
+        CASE
+          WHEN t.type = 'income'   THEN  t.amount_cents
+          WHEN t.type = 'expense'  THEN -t.amount_cents
+          WHEN t.type = 'transfer' THEN t.amount_cents
+          ELSE 0
+        END
+      ), 0) AS current_balance_cents
+    FROM wallets w
+    LEFT JOIN transactions t ON t.wallet_id = w.id
+    GROUP BY w.id
+    ORDER BY w.is_active DESC, w.sort_order ASC
+  `;
+  return db.getAllAsync<WalletWithBalance>(q.statement, [...q.params]);
+}
+
 /** Soft-delete: sets is_active = 0. */
 export async function deleteWallet(db: SQLiteDatabase, id: number): Promise<void> {
   const q = sql`UPDATE wallets SET is_active = ${0} WHERE id = ${id}`;

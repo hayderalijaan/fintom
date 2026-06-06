@@ -205,7 +205,7 @@ export default function SettingsScreen() {
             iconBg="#007AFF22"
             label="Wallets"
             badge={walletCount}
-            onPress={() => router.push('/manage/wallets' as Href)}
+            onPress={() => router.push('/settings/wallets' as Href)}
           />
           <Separator />
           <SettingsRow
