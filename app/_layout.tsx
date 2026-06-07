@@ -24,6 +24,7 @@ export default function RootLayout() {
             <Stack.Screen name="transaction/add" options={{ presentation: 'modal', headerShown: false, gestureEnabled: true }} />
             <Stack.Screen name="settings/wallets" options={{ headerShown: false }} />
             <Stack.Screen name="settings/categories" options={{ headerShown: false }} />
+            <Stack.Screen name="manage/recurring" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
