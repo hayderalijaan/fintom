@@ -42,14 +42,21 @@ Router requires them in `app/`.
 fintom/
 ├── app/                      # Expo Router — a file here = a route
 │   ├── (tabs)/               # Bottom tab navigation
+│   │   ├── _layout.tsx       # Tab bar layout
 │   │   ├── index.tsx         # Timeline (transaction feed)
 │   │   ├── wallets.tsx       # Wallets + balances
 │   │   ├── budgets.tsx       # Monthly budgets
 │   │   ├── goals.tsx         # Goals tracker
 │   │   └── settings.tsx      # Settings + management
+│   ├── manage/
+│   │   ├── recurring.tsx     # Recurring rules management
+│   │   └── tags.tsx          # Tags management
+│   ├── settings/
+│   │   ├── categories.tsx    # Category management
+│   │   ├── import.tsx        # CSV import (Spendee format)
+│   │   └── wallets.tsx       # Wallet management
 │   ├── transaction/
-│   │   ├── add.tsx           # Add transaction screen
-│   │   └── [id].tsx          # Edit/view transaction
+│   │   └── add.tsx           # Add transaction screen
 │   └── _layout.tsx           # Root layout + DB initialization
 ├── src/
 │   ├── db/

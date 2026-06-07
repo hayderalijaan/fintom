@@ -239,7 +239,7 @@ export default function SettingsScreen() {
             icon="📥"
             iconBg="#30B0C722"
             label="Import CSV"
-            onPress={() => router.push('/import' as Href)}
+            onPress={() => router.push('/settings/import' as Href)}
           />
           <Separator />
           <SettingsRow
