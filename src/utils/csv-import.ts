@@ -346,8 +346,13 @@ async function attachLabels(
 export async function importSpendeeCSV(
   db: SQLiteDatabase,
   csvText: string,
+  fromDate?: string,
 ): Promise<ImportSummary> {
-  const rows = parseCSV(csvText);
+  const allRows = parseCSV(csvText);
+  // fromDate is YYYY-MM-DD; ISO date strings compare correctly as plain strings.
+  const rows = fromDate
+    ? allRows.filter(r => normalizeDate(r.date) >= fromDate)
+    : allRows;
 
   const summary: ImportSummary = {
     imported: 0,

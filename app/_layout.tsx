@@ -26,6 +26,7 @@ export default function RootLayout() {
             <Stack.Screen name="settings/categories" options={{ headerShown: false }} />
             <Stack.Screen name="manage/recurring" options={{ headerShown: false }} />
             <Stack.Screen name="manage/tags" options={{ headerShown: false }} />
+            <Stack.Screen name="import" options={{ headerShown: false }} />
           </Stack>
           <StatusBar style="auto" />
         </ThemeProvider>
